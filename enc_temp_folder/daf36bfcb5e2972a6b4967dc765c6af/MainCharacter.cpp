@@ -237,14 +237,12 @@ void AMainCharacter::escapePressed(const FInputActionValue& Value)
 
 void AMainCharacter::erasePressed(const FInputActionValue& Value)
 {
-	if (!inEraseMode) {
-		if (inBuildMode) {
-			inBuildMode = false;
-			buildingHolo->Destroy();
-		}
-		inEraseMode = true;
-		deleteBox = GetWorld()->SpawnActor<AActor>(deleteBoxClass);
+	if (inBuildMode) {
+		inBuildMode = false;
+		buildingHolo->Destroy();
 	}
+	inEraseMode = true;
+	deleteBox = GetWorld()->SpawnActor<AActor>(deleteBoxClass);
 }
 
 void AMainCharacter::destroyActor()
