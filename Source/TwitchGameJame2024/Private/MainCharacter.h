@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "../TwitchGameJame2024.h"
 #include "MainCharacter.generated.h"
 
 class USpringArmComponent;
@@ -40,10 +41,29 @@ class AMainCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LClickAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* RClickAction;
+
+	/** Escape Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* EscapeAction;
+
+public:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	bool inBuildMode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	FBuildableStruct selectedBuildingInfo;
+
 private:
 
-	UPROPERTY(VisibleAnywhere, Category = gameMode)
-	bool inBuildMode;
+	UPROPERTY(VisibleDefaultsOnly, Category = Building)
+	ABuildablesBase* buildingHolo;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Building)
+	FRotator buildingRotation;
+
 
 public:
 	AMainCharacter();
@@ -56,12 +76,30 @@ protected:
 
 	void LClick(const FInputActionValue& Value);
 
+	void RClick(const FInputActionValue& Value);
+
+	void escapePressed(const FInputActionValue& Value);
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// To add mapping context
 	virtual void BeginPlay();
+
+public:
+	virtual void Tick(float DeltaTime) override;
+
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void enterBuildMode(FBuildableStruct buildingInfo);
+
+private:
+
+	UFUNCTION()
+	void spawnNewPlaceable();
+
 
 public:
 	/** Returns CameraBoom subobject **/

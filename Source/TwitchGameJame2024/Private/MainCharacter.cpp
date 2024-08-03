@@ -10,6 +10,7 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Buildings/BuildablesBase.h"
 #include "InputActionValue.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -47,6 +48,8 @@ AMainCharacter::AMainCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
+	PrimaryActorTick.bCanEverTick = true;
+
 	inBuildMode = false;
 }
 
@@ -54,6 +57,42 @@ void AMainCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+}
+
+void AMainCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (inBuildMode) {
+		if (APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
+			FHitResult Hit;
+			FVector location;
+			PlayerController->GetHitResultUnderCursor(ECC_WorldDynamic, true, Hit);
+
+			if (Hit.GetActor()) {
+				buildingHolo->SetActorLocation(snapToGrid2d(Hit.Location, 100, buildingHolo->GetSimpleCollisionHalfHeight()));
+			}
+		}
+	}
+}
+
+void AMainCharacter::enterBuildMode(FBuildableStruct buildingInfo)
+{
+	selectedBuildingInfo = buildingInfo;
+	buildingRotation = FRotator();
+
+	spawnNewPlaceable();
+
+	inBuildMode = true;
+}
+
+void AMainCharacter::spawnNewPlaceable()
+{
+	buildingHolo = GetWorld()->SpawnActor<ABuildablesBase>(selectedBuildingInfo.classRef);
+	buildingHolo->makeHolo();
+	buildingHolo->SetActorRotation(buildingRotation);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,6 +113,9 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
+		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::LClick);
+		EnhancedInputComponent->BindAction(RClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::RClick);
+		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Triggered, this, &AMainCharacter::escapePressed);
 	}
 	else
 	{
@@ -105,7 +147,39 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 }
 
 void AMainCharacter::LClick(const FInputActionValue& Value) {
+	if (inBuildMode){
+		if (!buildingHolo->isOverlap) {
+			buildingHolo->removeHolo();
 
-
-
+			spawnNewPlaceable();
+		}
+	}
+	else {
+		//line cast and check if it is clicking a building
+	}
 }
+
+void AMainCharacter::RClick(const FInputActionValue& Value)
+{
+	if (inBuildMode) {
+		buildingRotation.Yaw += 90;
+
+		buildingHolo->SetActorRotation(buildingRotation);
+	}
+}
+
+void AMainCharacter::escapePressed(const FInputActionValue& Value)
+{
+	if (inBuildMode) {
+		inBuildMode = false;
+
+		selectedBuildingInfo = FBuildableStruct();
+		buildingHolo->Destroy();
+		buildingHolo = nullptr;
+
+	}
+	else {
+		//pause game
+	}
+}
+
