@@ -25,11 +25,11 @@ class ABuildablesBase : public AActor
 	UMaterialInstance* HoloMat;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = mesh, meta = (AllowPrivateAccess = "true"))
-	UMaterialInstance* OverlapMat;
+	UMaterialInstance* InvalidMat;
 
 public:
 	UPROPERTY(BlueprintReadWrite)
-	bool isOverlap;
+	bool isInvalid;
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
@@ -55,7 +55,7 @@ public:
 	void removeHolo();
 
 	UFUNCTION()
-	void makeOverlap();
+	void makeInvalid();
 
 private:
 	UFUNCTION()

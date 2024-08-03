@@ -72,14 +72,54 @@ void AMainCharacter::Tick(float DeltaTime)
 			PlayerController->GetHitResultUnderCursor(ECC_WorldDynamic, true, Hit);
 
 			if (Hit.GetActor()) {
-				buildingHolo->SetActorLocation(snapToGrid2d(Hit.Location, 100, buildingHolo->GetSimpleCollisionHalfHeight()));
+				buildingHolo->SetActorLocation(snapToGrid2d(Hit.Location, gridSize, buildingHolo->GetSimpleCollisionHalfHeight()));
 			}
 		}
+	}
+	else if (inEraseMode) {
+		if (APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
+			FHitResult Hit;
+			FVector location;
+			PlayerController->GetHitResultUnderCursor(ECC_WorldDynamic, true, Hit);
+			if (Hit.GetActor()) {
+				if (ABuildablesBase* building = Cast<ABuildablesBase>(Hit.GetActor())) {
+					if (hoveredBuilding != building && hoveredBuilding) {
+						hoveredBuilding->removeHolo();
+					}
+					hoveredBuilding = building;
+					if (placedThisTurn.Contains(hoveredBuilding)) {
+						building->makeInvalid();
+					}
+					if (deleteBox) {
+						deleteBox->Destroy();
+						deleteBox = nullptr;
+					}
+				}
+				else {
+					if (hoveredBuilding) {
+						hoveredBuilding->removeHolo();
+					}
+					if (!deleteBox) {
+						deleteBox = GetWorld()->SpawnActor<AActor>(deleteBoxClass);
+					}
+
+					deleteBox->SetActorLocation(snapToGrid2d(Hit.Location, gridSize, deleteBox->GetSimpleCollisionHalfHeight()));
+				}
+			}
+		}
+		
 	}
 }
 
 void AMainCharacter::enterBuildMode(FBuildableStruct buildingInfo)
 {
+	if (inEraseMode) {
+		if (deleteBox) {
+			deleteBox->Destroy();
+		}
+		inEraseMode = false;
+	}
+
 	selectedBuildingInfo = buildingInfo;
 	buildingRotation = FRotator();
 
@@ -94,6 +134,8 @@ void AMainCharacter::spawnNewPlaceable()
 	buildingHolo->makeHolo();
 	buildingHolo->SetActorRotation(buildingRotation);
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -116,6 +158,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::LClick);
 		EnhancedInputComponent->BindAction(RClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::RClick);
 		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Triggered, this, &AMainCharacter::escapePressed);
+		EnhancedInputComponent->BindAction(EraseAction, ETriggerEvent::Triggered, this, &AMainCharacter::erasePressed);
 	}
 	else
 	{
@@ -148,12 +191,19 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 
 void AMainCharacter::LClick(const FInputActionValue& Value) {
 	if (inBuildMode){
-		if (!buildingHolo->isOverlap) {
+		if (!buildingHolo->isInvalid) {
 			buildingHolo->removeHolo();
-
+			placedThisTurn.Add(buildingHolo);
 			spawnNewPlaceable();
 		}
 	}
+	else if (inEraseMode) {
+		if (hoveredBuilding) {
+			if (placedThisTurn.Contains(hoveredBuilding)){
+				destroyActor();
+			}
+		}
+	} 
 	else {
 		//line cast and check if it is clicking a building
 	}
@@ -176,10 +226,27 @@ void AMainCharacter::escapePressed(const FInputActionValue& Value)
 		selectedBuildingInfo = FBuildableStruct();
 		buildingHolo->Destroy();
 		buildingHolo = nullptr;
-
+	}
+	else if (inEraseMode) {
+		inEraseMode = false;
 	}
 	else {
 		//pause game
 	}
 }
 
+void AMainCharacter::erasePressed(const FInputActionValue& Value)
+{
+	if (inBuildMode) {
+		inBuildMode = false;
+		buildingHolo->Destroy();
+	}
+	inEraseMode = true;
+	deleteBox = GetWorld()->SpawnActor<AActor>(deleteBoxClass);
+}
+
+void AMainCharacter::destroyActor()
+{
+	placedThisTurn.Remove(hoveredBuilding);
+	hoveredBuilding->Destroy();
+}

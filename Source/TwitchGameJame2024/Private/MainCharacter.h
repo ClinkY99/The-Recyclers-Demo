@@ -48,10 +48,22 @@ class AMainCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EscapeAction;
 
+	/** Erase Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* EraseAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> deleteBoxClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
+	int32 gridSize;
+
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	bool inBuildMode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	bool inEraseMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	FBuildableStruct selectedBuildingInfo;
@@ -63,6 +75,15 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Building)
 	FRotator buildingRotation;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Building)
+	TArray<ABuildablesBase*> placedThisTurn;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Building)
+	ABuildablesBase* hoveredBuilding;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Building)
+	AActor* deleteBox;
 
 
 public:
@@ -79,6 +100,8 @@ protected:
 	void RClick(const FInputActionValue& Value);
 
 	void escapePressed(const FInputActionValue& Value);
+
+	void erasePressed(const FInputActionValue& Value);
 
 protected:
 	// APawn interface
@@ -99,6 +122,9 @@ private:
 
 	UFUNCTION()
 	void spawnNewPlaceable();
+
+	UFUNCTION()
+	void destroyActor();
 
 
 public:

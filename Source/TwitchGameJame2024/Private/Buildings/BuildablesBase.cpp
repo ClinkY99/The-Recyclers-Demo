@@ -16,7 +16,7 @@ ABuildablesBase::ABuildablesBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	isOverlap = false;
+	isInvalid = false;
 	isPlaced = false;
 }
 
@@ -42,7 +42,7 @@ void ABuildablesBase::Tick(float DeltaTime)
 void ABuildablesBase::makeHolo()
 {
 	mesh->SetMaterial(0, HoloMat);
-	isOverlap = false;
+	isInvalid = false;
 }
 
 void ABuildablesBase::removeHolo()
@@ -51,16 +51,16 @@ void ABuildablesBase::removeHolo()
 	isPlaced = true;
 }
 
-void ABuildablesBase::makeOverlap()
+void ABuildablesBase::makeInvalid()
 {
-	mesh->SetMaterial(0, OverlapMat);
-	isOverlap = true;
+	mesh->SetMaterial(0, InvalidMat);
+	isInvalid = true;
 }
 
 void ABuildablesBase::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (Cast<ABuildablesBase>(OtherActor) && !isPlaced) {
-		makeOverlap();
+		makeInvalid();
 	}
 }
 
