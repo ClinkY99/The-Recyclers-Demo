@@ -59,6 +59,8 @@ void AMainCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+
+	WorkerPlaceMarker = GetWorld()->SpawnActor<AActor>(workerPlaceMarkerClass);
 }
 
 void AMainCharacter::Tick(float DeltaTime)
@@ -73,6 +75,21 @@ void AMainCharacter::Tick(float DeltaTime)
 
 			if (Hit.GetActor()) {
 				buildingHolo->SetActorLocation(snapToGrid2d(Hit.Location, gridSize, buildingHolo->GetSimpleCollisionHalfHeight()));
+			}
+		}
+	}
+	else if (inBuildModeWorker) {
+		if (APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
+			FHitResult Hit;
+			FVector location;
+			PlayerController->GetHitResultUnderCursor(ECC_WorldDynamic, true, Hit);
+
+			if (Hit.GetActor()) {
+				location.X = Hit.Location.X;
+				location.Y = Hit.Location.Y;
+				location.Z = 0;
+
+				WorkerPlaceMarker->SetActorLocation(location);
 			}
 		}
 	}
@@ -113,19 +130,19 @@ void AMainCharacter::Tick(float DeltaTime)
 
 void AMainCharacter::enterBuildMode(FBuildableStruct buildingInfo)
 {
-	if (inEraseMode) {
-		if (deleteBox) {
-			deleteBox->Destroy();
-		}
-		inEraseMode = false;
-	}
-
+	exitMode();
 	selectedBuildingInfo = buildingInfo;
 	buildingRotation = FRotator();
 
 	spawnNewPlaceable();
 
 	inBuildMode = true;
+}
+
+void AMainCharacter::enterBuildModeWorker()
+{
+	exitMode();
+	inBuildModeWorker = true;
 }
 
 void AMainCharacter::spawnNewPlaceable()
@@ -156,6 +173,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
 		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::LClick);
+		EnhancedInputComponent->BindAction(PlaceWorkerAction, ETriggerEvent::Triggered, this, &AMainCharacter::placeWorker);
 		EnhancedInputComponent->BindAction(RClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::RClick);
 		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Triggered, this, &AMainCharacter::escapePressed);
 		EnhancedInputComponent->BindAction(EraseAction, ETriggerEvent::Triggered, this, &AMainCharacter::erasePressed);
@@ -191,12 +209,12 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 
 void AMainCharacter::LClick(const FInputActionValue& Value) {
 	if (inBuildMode){
-		if (!buildingHolo->isInvalid) {
+		if (buildingHolo) {
 			buildingHolo->removeHolo();
 			placedThisTurn.Add(buildingHolo);
 			spawnNewPlaceable();
 		}
-	}
+	} 
 	else if (inEraseMode) {
 		if (hoveredBuilding) {
 			if (placedThisTurn.Contains(hoveredBuilding)){
@@ -206,6 +224,18 @@ void AMainCharacter::LClick(const FInputActionValue& Value) {
 	} 
 	else {
 		//line cast and check if it is clicking a building
+	}
+}
+
+void AMainCharacter::placeWorker(const FInputActionValue& Value)
+{
+	if (inBuildModeWorker) {
+		AWorker* worker = GetWorld()->SpawnActor<AWorker>(workerClass);
+		if (worker) {
+			worker->SetActorLocation(WorkerPlaceMarker->GetActorLocation());
+		}
+		WorkerPlaceMarker->SetActorLocation(FVector(0, 0, -500));
+
 	}
 }
 
@@ -220,15 +250,8 @@ void AMainCharacter::RClick(const FInputActionValue& Value)
 
 void AMainCharacter::escapePressed(const FInputActionValue& Value)
 {
-	if (inBuildMode) {
-		inBuildMode = false;
-
-		selectedBuildingInfo = FBuildableStruct();
-		buildingHolo->Destroy();
-		buildingHolo = nullptr;
-	}
-	else if (inEraseMode) {
-		inEraseMode = false;
+	if (inBuildMode || inEraseMode || inBuildModeWorker) {
+		exitMode();
 	}
 	else {
 		//pause game
@@ -251,4 +274,24 @@ void AMainCharacter::destroyActor()
 {
 	placedThisTurn.Remove(hoveredBuilding);
 	hoveredBuilding->Destroy();
+}
+
+void AMainCharacter::exitMode()
+{
+	if (inBuildMode) {
+		inBuildMode = false;
+
+		selectedBuildingInfo = FBuildableStruct();
+		buildingHolo->Destroy();
+	}
+	else if (inBuildModeWorker) {
+		inBuildModeWorker = false;
+		WorkerPlaceMarker->SetActorLocation(FVector(0, 0, -500));
+	}
+	else if (inEraseMode){
+		if (deleteBox) {
+			deleteBox->Destroy();
+		}
+		inEraseMode = false;
+	}
 }

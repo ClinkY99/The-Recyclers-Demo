@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "../TwitchGameJame2024.h"
+#include "Worker.h"
 #include "MainCharacter.generated.h"
 
 class USpringArmComponent;
@@ -42,6 +43,9 @@ class AMainCharacter : public ACharacter
 	UInputAction* LClickAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PlaceWorkerAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RClickAction;
 
 	/** Escape Input Action */
@@ -54,6 +58,13 @@ class AMainCharacter : public ACharacter
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> deleteBoxClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> workerPlaceMarkerClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AWorker> workerClass;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
 	int32 gridSize;
 
@@ -61,6 +72,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	bool inBuildMode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	bool inBuildModeWorker;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	bool inEraseMode;
@@ -85,6 +99,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Building)
 	AActor* deleteBox;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = Building)
+	AActor* WorkerPlaceMarker;
+
 
 public:
 	AMainCharacter();
@@ -96,6 +113,8 @@ protected:
 	void Move(const FInputActionValue& Value);
 
 	void LClick(const FInputActionValue& Value);
+
+	void placeWorker(const FInputActionValue& Value);
 
 	void RClick(const FInputActionValue& Value);
 
@@ -118,6 +137,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void enterBuildMode(FBuildableStruct buildingInfo);
 
+	UFUNCTION(BlueprintCallable)
+	void enterBuildModeWorker();
+
 private:
 
 	UFUNCTION()
@@ -125,6 +147,9 @@ private:
 
 	UFUNCTION()
 	void destroyActor();
+
+	UFUNCTION()
+	void exitMode();
 
 
 public:
