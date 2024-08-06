@@ -43,7 +43,7 @@ class AMainCharacter : public ACharacter
 	UInputAction* LClickAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* PlaceWorkerAction;
+	UInputAction* pressedLClickAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RClickAction;
@@ -79,6 +79,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	bool inEraseMode;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Management)
+	bool inPathingMode;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	FBuildableStruct selectedBuildingInfo;
 
@@ -102,6 +105,10 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Building)
 	AActor* WorkerPlaceMarker;
 
+	IInteractInterface* HoveredActor;
+
+	IInteractInterface* SelectedActor;
+
 
 public:
 	AMainCharacter();
@@ -114,7 +121,7 @@ protected:
 
 	void LClick(const FInputActionValue& Value);
 
-	void placeWorker(const FInputActionValue& Value);
+	void pressedLClick(const FInputActionValue& Value);
 
 	void RClick(const FInputActionValue& Value);
 

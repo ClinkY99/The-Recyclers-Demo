@@ -3,6 +3,7 @@
 
 #include "Worker.h"
 #include "Components/CapsuleComponent.h"
+#include "MainCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -10,18 +11,15 @@ AWorker::AWorker(){
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
-	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
-	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
-	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = 700.f;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
-	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+	// Configure character movement
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Rotate character to moving direction
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 640.f, 0.f);
+	GetCharacterMovement()->bConstrainToPlane = true;
+	GetCharacterMovement()->bSnapToPlaneAtStart = true;
+
+	GetMesh()->SetCustomDepthStencilValue(0);
 
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -47,5 +45,40 @@ void AWorker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AWorker::hover(bool isHovered)
+{
+	if (!isSelected) {
+		GetMesh()->SetRenderCustomDepth(isHovered);
+	}
+}
+
+
+void AWorker::select(AMainCharacter* character)
+{
+	GetMesh()->SetCustomDepthStencilValue(1);
+	isSelected = true;
+
+	character->inPathingMode = true;
+
+	if (workstation) {
+		workstation->select(character);
+	}
+}
+
+
+void AWorker::unselect(AMainCharacter* character)
+{
+	GetMesh()->SetCustomDepthStencilValue(0);
+	GetMesh()->SetRenderCustomDepth(false);
+		
+	character->inPathingMode = false;
+
+	isSelected = false;
+
+	if (workstation) {
+		workstation->unselect(character);
+	}
 }
 

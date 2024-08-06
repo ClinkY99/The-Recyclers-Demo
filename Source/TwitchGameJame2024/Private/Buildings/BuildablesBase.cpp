@@ -13,6 +13,8 @@ ABuildablesBase::ABuildablesBase()
 	overlap = CreateDefaultSubobject<UBoxComponent>(FName("Overlap"));
 	overlap->SetupAttachment(RootComponent);
 
+	navBlock = CreateDefaultSubobject<UNavModifierComponent>(FName("Nav Modifier"));
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 

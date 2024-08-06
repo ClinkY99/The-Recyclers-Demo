@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "NavModifierComponent.h"
 #include "BuildablesBase.generated.h"
 
 UCLASS()
@@ -14,6 +15,9 @@ class ABuildablesBase : public AActor
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* mesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
+	UNavModifierComponent* navBlock;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* overlap;

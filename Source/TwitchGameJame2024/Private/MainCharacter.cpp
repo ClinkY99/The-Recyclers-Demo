@@ -11,6 +11,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Buildings/BuildablesBase.h"
+#include "Gameplay/Workstation.h"
+#include "Kismet/GameplayStatics.h"
 #include "InputActionValue.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -20,6 +22,8 @@ AMainCharacter::AMainCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(0.f, 0.f);
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -125,6 +129,28 @@ void AMainCharacter::Tick(float DeltaTime)
 			}
 		}
 		
+	} 
+	else {
+		if (APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
+			FHitResult Hit;
+
+			PlayerController->GetHitResultUnderCursor(ECC_WorldDynamic, true, Hit);
+			
+			if (IInteractInterface* actorRef = Cast<IInteractInterface>(Hit.GetActor())) {
+				if (HoveredActor!=actorRef && HoveredActor) {
+					HoveredActor->hover(false);
+				}
+				actorRef->hover(true);
+				HoveredActor = actorRef;
+			}
+			else if (HoveredActor) {
+				HoveredActor->hover(false);
+				HoveredActor = nullptr;
+			}
+			
+		}
+
+
 	}
 }
 
@@ -173,7 +199,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
 		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::LClick);
-		EnhancedInputComponent->BindAction(PlaceWorkerAction, ETriggerEvent::Triggered, this, &AMainCharacter::placeWorker);
+		EnhancedInputComponent->BindAction(pressedLClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::pressedLClick);
 		EnhancedInputComponent->BindAction(RClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::RClick);
 		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Triggered, this, &AMainCharacter::escapePressed);
 		EnhancedInputComponent->BindAction(EraseAction, ETriggerEvent::Triggered, this, &AMainCharacter::erasePressed);
@@ -221,21 +247,57 @@ void AMainCharacter::LClick(const FInputActionValue& Value) {
 				destroyActor();
 			}
 		}
-	} 
+	}
 	else {
 		//line cast and check if it is clicking a building
 	}
 }
 
-void AMainCharacter::placeWorker(const FInputActionValue& Value)
+void AMainCharacter::pressedLClick(const FInputActionValue& Value)
 {
 	if (inBuildModeWorker) {
-		AWorker* worker = GetWorld()->SpawnActor<AWorker>(workerClass);
-		if (worker) {
-			worker->SetActorLocation(WorkerPlaceMarker->GetActorLocation());
-		}
-		WorkerPlaceMarker->SetActorLocation(FVector(0, 0, -500));
+		TArray<AActor*> workers;
+		TArray<AActor*> workstations;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorker::StaticClass(), workers);
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorkstation::StaticClass(), workstations);
 
+		if (workers.Num() < workstations.Num()) {
+			AWorker* worker = GetWorld()->SpawnActor<AWorker>(workerClass);
+			if (worker) {
+				worker->SetActorLocation(WorkerPlaceMarker->GetActorLocation());
+			}
+			WorkerPlaceMarker->SetActorLocation(FVector(0, 0, -500));
+		}
+
+	}
+	else if (SelectedActor == HoveredActor) {
+		SelectedActor->unselect(this);
+		SelectedActor = nullptr;
+	}
+	else if (inPathingMode && HoveredActor) {
+		if (AWorkstation* actorRef = Cast<AWorkstation>(HoveredActor)) {
+			if (!actorRef->GetWorker()) {
+				AWorker* workerRef = Cast<AWorker>(SelectedActor);
+				workerRef->setNewWorkStation(actorRef);
+				actorRef->SetWorker(workerRef);
+				actorRef->select(this);
+			}
+		}
+		else {
+			SelectedActor->unselect(this);
+			SelectedActor = HoveredActor;
+			SelectedActor->select(this);
+		}
+	}
+	
+	else if (SelectedActor && HoveredActor) {
+		SelectedActor->unselect(this);
+		SelectedActor = HoveredActor;
+		SelectedActor->select(this);
+	}
+	else if (HoveredActor) {
+		HoveredActor->select(this);
+		SelectedActor = HoveredActor;
 	}
 }
 
@@ -252,6 +314,9 @@ void AMainCharacter::escapePressed(const FInputActionValue& Value)
 {
 	if (inBuildMode || inEraseMode || inBuildModeWorker) {
 		exitMode();
+	}
+	else if (SelectedActor) {
+		SelectedActor->unselect(this);
 	}
 	else {
 		//pause game

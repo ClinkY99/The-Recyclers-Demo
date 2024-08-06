@@ -4,12 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InteractInterface.h"
+#include "Gameplay/Workstation.h"
+#include "NavModifierComponent.h"
 #include "Worker.generated.h"
 
+
 UCLASS()
-class AWorker : public ACharacter
+class AWorker : public ACharacter, public IInteractInterface 
 {
 	GENERATED_BODY()
+	
+
+protected:
+
+	UPROPERTY(BlueprintReadWrite, Category = selection)
+	bool isSelected;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = work)
+	AWorkstation* workstation;
+
+	
 
 public:
 	// Sets default values for this character's properties
@@ -25,5 +40,15 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void hover(bool isHovered) override;
+
+	virtual void select(AMainCharacter* character) override;
+
+	virtual void unselect(AMainCharacter* character) override;
+
+public:
+	UFUNCTION(BlueprintImplementableEvent)
+	void setNewWorkStation(AWorkstation* newWorkstation);
 
 };
