@@ -14,6 +14,7 @@
 #include "Gameplay/Workstation.h"
 #include "Kismet/GameplayStatics.h"
 #include "InputActionValue.h"
+#include "StartInterface.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -171,6 +172,30 @@ void AMainCharacter::enterBuildModeWorker()
 	inBuildModeWorker = true;
 }
 
+void AMainCharacter::SpawnCollectionTruck()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("CollectionTruckCalled"));
+}
+
+void AMainCharacter::StartRound()
+{
+	if (!isInRound) {
+		TArray<AActor*> actors;
+		UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UStartInterface::StaticClass(), actors);
+		for (auto& actor : actors) {
+			if (IStartInterface* actorCast = Cast<IStartInterface>(actor)) {
+				actorCast->startRound();
+			}
+		}
+		isInRound = true;
+	}
+}
+
+void AMainCharacter::endGame()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0, FColor::Red, TEXT("Game Over"));
+}
+
 void AMainCharacter::spawnNewPlaceable()
 {
 	buildingHolo = GetWorld()->SpawnActor<ABuildablesBase>(selectedBuildingInfo.classRef);
@@ -203,6 +228,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(RClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::RClick);
 		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Triggered, this, &AMainCharacter::escapePressed);
 		EnhancedInputComponent->BindAction(EraseAction, ETriggerEvent::Triggered, this, &AMainCharacter::erasePressed);
+		EnhancedInputComponent->BindAction(StartRoundAction, ETriggerEvent::Triggered, this, &AMainCharacter::StartRound);
 	}
 	else
 	{
@@ -270,7 +296,7 @@ void AMainCharacter::pressedLClick(const FInputActionValue& Value)
 		}
 
 	}
-	else if (SelectedActor == HoveredActor) {
+	else if (SelectedActor == HoveredActor && SelectedActor) {
 		SelectedActor->unselect(this);
 		SelectedActor = nullptr;
 	}
@@ -305,7 +331,9 @@ void AMainCharacter::RClick(const FInputActionValue& Value)
 {
 	if (inBuildMode) {
 		buildingRotation.Yaw += 90;
-
+		if (buildingRotation.Yaw == 360) {
+			buildingRotation.Yaw = 0;
+		}
 		buildingHolo->SetActorRotation(buildingRotation);
 	}
 }
@@ -317,6 +345,7 @@ void AMainCharacter::escapePressed(const FInputActionValue& Value)
 	}
 	else if (SelectedActor) {
 		SelectedActor->unselect(this);
+		SelectedActor = nullptr;
 	}
 	else {
 		//pause game

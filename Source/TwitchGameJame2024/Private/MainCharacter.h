@@ -56,6 +56,9 @@ class AMainCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EraseAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* StartRoundAction;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> deleteBoxClass;
 
@@ -85,6 +88,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	FBuildableStruct selectedBuildingInfo;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	bool isInRound;
+
+
 private:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Building)
@@ -108,7 +115,7 @@ private:
 	IInteractInterface* HoveredActor;
 
 	IInteractInterface* SelectedActor;
-
+	
 
 public:
 	AMainCharacter();
@@ -146,6 +153,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void enterBuildModeWorker();
+	
+	UFUNCTION()
+	void SpawnCollectionTruck();
+
+	UFUNCTION()
+	void StartRound();
+
+	UFUNCTION()
+	void endGame();
 
 private:
 

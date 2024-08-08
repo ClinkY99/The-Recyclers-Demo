@@ -6,15 +6,15 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "NavModifierComponent.h"
+#include "../StartInterface.h"
 #include "BuildablesBase.generated.h"
 
 UCLASS()
-class ABuildablesBase : public AActor
+class ABuildablesBase : public AActor, public IStartInterface
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* mesh;
+	
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
 	UNavModifierComponent* navBlock;
@@ -31,9 +31,15 @@ class ABuildablesBase : public AActor
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = mesh, meta = (AllowPrivateAccess = "true"))
 	UMaterialInstance* InvalidMat;
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* mesh;
 public:
 	UPROPERTY(BlueprintReadWrite)
 	bool isInvalid;
+
+private:
+	bool inRound;
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
@@ -51,6 +57,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void startRound() override;
+
+	virtual void endRound() override;
+
 public:
 	UFUNCTION()
 	void makeHolo();
@@ -60,6 +70,9 @@ public:
 
 	UFUNCTION()
 	void makeInvalid();
+
+protected:
+
 
 private:
 	UFUNCTION()

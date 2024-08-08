@@ -11,7 +11,7 @@ ABuildablesBase::ABuildablesBase()
 	mesh->SetupAttachment(RootComponent);
 
 	overlap = CreateDefaultSubobject<UBoxComponent>(FName("Overlap"));
-	overlap->SetupAttachment(RootComponent);
+	overlap->SetupAttachment(mesh);
 
 	navBlock = CreateDefaultSubobject<UNavModifierComponent>(FName("Nav Modifier"));
 
@@ -29,8 +29,7 @@ void ABuildablesBase::BeginPlay()
 
 	overlap->OnComponentBeginOverlap.AddDynamic(this, &ABuildablesBase::OverlapBegin);
 
-	overlap->OnComponentEndOverlap.AddDynamic(this, &ABuildablesBase::OverlapEnd);
-	
+	overlap->OnComponentEndOverlap.AddDynamic(this, &ABuildablesBase::OverlapEnd);	
 }
 
 // Called every frame
@@ -39,6 +38,16 @@ void ABuildablesBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	overlap->SetWorldLocation(GetActorLocation());
 
+}
+
+void ABuildablesBase::startRound()
+{
+	inRound = true;
+}
+
+void ABuildablesBase::endRound()
+{
+	inRound = false;
 }
 
 void ABuildablesBase::makeHolo()

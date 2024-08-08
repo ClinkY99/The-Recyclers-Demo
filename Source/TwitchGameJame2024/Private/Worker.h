@@ -7,6 +7,8 @@
 #include "InteractInterface.h"
 #include "Gameplay/Workstation.h"
 #include "NavModifierComponent.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "Container.h"
 #include "Worker.generated.h"
 
 
@@ -23,8 +25,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = work)
 	AWorkstation* workstation;
-
+public:
+	float workEfficiency = 1;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = work)
+	bool doneWorking;
+
+	Container* containerOfMaterials;
 
 public:
 	// Sets default values for this character's properties
@@ -50,5 +57,8 @@ public:
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void setNewWorkStation(AWorkstation* newWorkstation);
+
+	UFUNCTION(BlueprintCallable)
+	void updateWorkBehavior(UBehaviorTree* NewBehavior);
 
 };

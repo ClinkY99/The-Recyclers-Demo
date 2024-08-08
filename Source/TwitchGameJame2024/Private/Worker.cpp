@@ -4,6 +4,7 @@
 #include "Worker.h"
 #include "Components/CapsuleComponent.h"
 #include "MainCharacter.h"
+#include "AIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -79,6 +80,14 @@ void AWorker::unselect(AMainCharacter* character)
 
 	if (workstation) {
 		workstation->unselect(character);
+	}
+}
+
+void AWorker::updateWorkBehavior(UBehaviorTree* NewBehavior)
+{
+	if (AAIController* AIcontroller = Cast<AAIController>(Controller)) {
+		AIcontroller->BrainComponent->StopLogic("newWorkDirective");
+		AIcontroller->RunBehaviorTree(NewBehavior);
 	}
 }
 
