@@ -34,6 +34,7 @@ public:
 
 	AAutomatedBuilding* owner;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Working)
 	bool isCompactCubes;
 
 protected:

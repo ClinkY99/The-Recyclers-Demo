@@ -10,17 +10,13 @@ ACompactor::ACompactor()
 
 	workStationPoint = CreateDefaultSubobject<USceneComponent>(FName("WorkStationLocation"));
 	workStationPoint->SetupAttachment(mesh);
+
+	
 }
 
 void ACompactor::BeginPlay()
 {
-	Super::BeginPlay();
-	if (!inputBuilding) {
-		spawnDropOff();
-	}
-	if (isManual) {
-		spawnWorkstation();
-	}
+	Super::BeginPlay();	
 }
 
 void ACompactor::Tick(float DeltaTime)
@@ -34,6 +30,16 @@ void ACompactor::Tick(float DeltaTime)
 		if (outputBuilding->dropOffcompressedCube(ItemsInOutput[0])) {
 			ItemsInOutput.RemoveAt(0);
 		}
+	}
+}
+
+void ACompactor::build()
+{
+	if (!inputBuilding) {
+		spawnDropOff();
+	}
+	if (isManual) {
+		spawnWorkstation();
 	}
 }
 
@@ -107,7 +113,7 @@ void ACompactor::spawnDropOff()
 
 void ACompactor::spawnWorkstation()
 {
-	AWorkstation* workstation = GetWorld()->SpawnActor<AWorkstation>(workstationClass);
+	AcompactingStation* workstation = GetWorld()->SpawnActor<AcompactingStation>(workstationClass);
 	workstation->owner = this;
 
 	workstation->AttachToComponent(workStationPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);

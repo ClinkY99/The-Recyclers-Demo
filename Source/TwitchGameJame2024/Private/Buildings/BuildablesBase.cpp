@@ -10,6 +10,9 @@ ABuildablesBase::ABuildablesBase()
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("Mesh"));
 	mesh->SetupAttachment(RootComponent);
 
+	placingMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("placingMesh"));
+	placingMesh->SetupAttachment(mesh);
+
 	overlap = CreateDefaultSubobject<UBoxComponent>(FName("Overlap"));
 	overlap->SetupAttachment(mesh);
 
@@ -26,6 +29,8 @@ ABuildablesBase::ABuildablesBase()
 void ABuildablesBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	placingMesh->SetVisibility(false);
 
 	overlap->OnComponentBeginOverlap.AddDynamic(this, &ABuildablesBase::OverlapBegin);
 
@@ -52,20 +57,30 @@ void ABuildablesBase::endRound()
 
 void ABuildablesBase::makeHolo()
 {
-	mesh->SetMaterial(0, HoloMat);
+	mesh->SetVisibility(false);
+	placingMesh->SetVisibility(true);
+	placingMesh->SetMaterial(0,HoloMat);
 	isInvalid = false;
 }
 
 void ABuildablesBase::removeHolo()
 {
-	mesh->SetMaterial(0, regularMat);
+	mesh->SetVisibility(true);
+	placingMesh->SetVisibility(false);
 	isPlaced = true;
+	build();
 }
 
 void ABuildablesBase::makeInvalid()
 {
-	mesh->SetMaterial(0, InvalidMat);
+	placingMesh->SetVisibility(true);
+	placingMesh->SetMaterial(0, InvalidMat);
 	isInvalid = true;
+}
+
+void ABuildablesBase::build()
+{
+
 }
 
 void ABuildablesBase::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

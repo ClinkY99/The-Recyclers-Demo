@@ -31,6 +31,9 @@ class ABuildablesBase : public AActor, public IStartInterface
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = mesh, meta = (AllowPrivateAccess = "true"))
 	UMaterialInstance* InvalidMat;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* placingMesh;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* mesh;
@@ -71,6 +74,8 @@ public:
 	UFUNCTION()
 	void makeInvalid();
 
+	virtual void build();
+
 protected:
 
 
@@ -80,4 +85,9 @@ private:
 
 	UFUNCTION()
 	void OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+public:
+
+	FORCEINLINE UStaticMeshComponent* getMesh() { return mesh; };
 };
+

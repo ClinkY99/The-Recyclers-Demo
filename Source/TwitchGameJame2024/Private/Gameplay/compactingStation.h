@@ -15,7 +15,7 @@ class AcompactingStation : public AWorkstation
 {
 	GENERATED_BODY()
 	
-
+public:
 	class ACompactor* owner;
 
 private:

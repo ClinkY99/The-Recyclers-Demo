@@ -36,6 +36,7 @@ public:
 	AActor* owner;
 
 
+
 public:	
 	// Sets default values for this actor's properties
 	AWorkstation();

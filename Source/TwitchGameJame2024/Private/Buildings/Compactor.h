@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Buildings/AutomatedBuilding.h"
 #include "../Gameplay/DropOffStation.h"
-#include "../Gameplay/Workstation.h"
+#include "../Gameplay/compactingStation.h"
 #include "../Items/CompressedCube.h"
 #include "Compactor.generated.h"
 
@@ -38,7 +38,7 @@ class ACompactor : public AAutomatedBuilding
 	USceneComponent* workStationPoint;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = dropOffs, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AWorkstation> workstationClass;
+	TSubclassOf<AcompactingStation> workstationClass;
 
 
 
@@ -60,6 +60,8 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void build() override;
 
 	void abortCompacting();
 

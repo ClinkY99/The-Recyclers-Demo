@@ -79,7 +79,7 @@ void AMainCharacter::Tick(float DeltaTime)
 			PlayerController->GetHitResultUnderCursor(ECC_WorldDynamic, true, Hit);
 
 			if (Hit.GetActor()) {
-				buildingHolo->SetActorLocation(snapToGrid2d(Hit.Location, gridSize, buildingHolo->GetSimpleCollisionHalfHeight()));
+				buildingHolo->SetActorLocation(snapToGrid2d(Hit.Location, gridSize, 0));
 			}
 		}
 	}
@@ -260,28 +260,26 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 }
 
 void AMainCharacter::LClick(const FInputActionValue& Value) {
-	if (inBuildMode){
+
+}
+
+void AMainCharacter::pressedLClick(const FInputActionValue& Value)
+{
+	if (inBuildMode) {
 		if (buildingHolo) {
 			buildingHolo->removeHolo();
 			placedThisTurn.Add(buildingHolo);
 			spawnNewPlaceable();
 		}
-	} 
+	}
 	else if (inEraseMode) {
 		if (hoveredBuilding) {
-			if (placedThisTurn.Contains(hoveredBuilding)){
+			if (placedThisTurn.Contains(hoveredBuilding)) {
 				destroyActor();
 			}
 		}
 	}
-	else {
-		//line cast and check if it is clicking a building
-	}
-}
-
-void AMainCharacter::pressedLClick(const FInputActionValue& Value)
-{
-	if (inBuildModeWorker) {
+	else if (inBuildModeWorker) {
 		TArray<AActor*> workers;
 		TArray<AActor*> workstations;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorker::StaticClass(), workers);

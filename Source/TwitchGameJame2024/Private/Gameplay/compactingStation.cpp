@@ -6,13 +6,16 @@
 
 void AcompactingStation::work()
 {
-	if (owner->ItemsInOutput.Num() > 0) {
-		Container* container = new Container();
-		container->materialType = owner->ItemsInOutput[0]->materialType + 4;
-		container->amountOfMaterial = 1;
-		worker->containerOfMaterials = container;
-		worker->doneWorking = true;
-		owner->ItemsInOutput.Remove(owner->ItemsInOutput[0]);
+	if (inRound) {
+		if (owner->ItemsInOutput.Num() > 0) {
+			CompressedCube* cube = owner->ItemsInOutput[0];
+			Container* container = new Container();
+			container->materialType = cube->materialType + 4;
+			container->amountOfMaterial = 1;
+			worker->containerOfMaterials = container;
+			worker->doneWorking = true;
+			owner->ItemsInOutput.Remove(cube);
+		}
 	}
 }
 

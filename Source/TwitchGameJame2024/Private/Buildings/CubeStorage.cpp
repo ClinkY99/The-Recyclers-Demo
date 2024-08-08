@@ -21,10 +21,7 @@ ACubeStorage::ACubeStorage()
 void ACubeStorage::BeginPlay()
 {
 	Super::BeginPlay();
-	if (!inputBuilding) {
-		spawnDropOff();
-	}
-	spawnWorkstation();
+	
 
 }
 
@@ -32,24 +29,46 @@ void ACubeStorage::BeginPlay()
 bool ACubeStorage::dropOffMaterial(Container* container)
 {
 	if (Super::dropOffMaterial(container)) {
-		AStaticMeshActor* newMesh = GetWorld()->SpawnActor<AStaticMeshActor>();
-		newMesh->GetStaticMeshComponent()->SetStaticMesh(GarbageCubeMesh);
-		newMesh->GetStaticMeshComponent()->SetMaterial(0, Materials[container->materialType - 4]);
-		newMesh->AttachToComponent(FirstSpawnSpot, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-		FVector newLocation = newMesh->GetActorLocation();
-		if (GetActorRotation().Yaw == 0, 180) {
-			newLocation.Y += spawned > 2 ? 250 * spawned - 3 : 250 * spawned;
-		}
-		else {
-			newLocation.X += spawned > 2 ? 250 * spawned - 3 : 250 * spawned;
-		}
-		newLocation.Z = spawned > 2 ? 300 : 100;
+		
+		UStaticMeshComponent* compressedCube = NewObject<UStaticMeshComponent>(this);
+
+		compressedCube->RegisterComponent();
+		compressedCube->AttachToComponent(FirstSpawnSpot, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		AddOwnedComponent(compressedCube);
+		compressedCube->SetStaticMesh(GarbageCubeMesh);
+		compressedCube->SetMaterial(0, Materials[container->materialType - 4]);
+		compressedCube->SetMaterial(1, secondMaterial);
+
+
+		FVector newLocation = compressedCube->GetRelativeLocation();
+
+
+		newLocation.Y += spawned > 2 ? -25 * (spawned - 3) : -25 * spawned;
+		
+		newLocation.Z = spawned > 2 ? 2250 : 400;
+
+		spawned++;
+
+		compressedCube->SetRelativeLocation(newLocation);
+
+		FRotator newRotation = compressedCube->GetRelativeRotation();
+		newRotation.Yaw += 90;
+
+		compressedCube->SetRelativeRotation(newRotation);
 
 		SpawnTruck();
 
 		return true;
 	}
 	return false;
+}
+
+void ACubeStorage::build()
+{
+	if (!inputBuilding) {
+		spawnDropOff();
+	}
+	spawnWorkstation();
 }
 
 void ACubeStorage::SpawnTruck()

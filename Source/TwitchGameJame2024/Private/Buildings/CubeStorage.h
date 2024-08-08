@@ -26,6 +26,9 @@ class ACubeStorage : public AAutomatedBuilding
 	TArray<UMaterial*> Materials;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = workTime, meta = (AllowPrivateAccess = "true"))
+	UMaterial* secondMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = workTime, meta = (AllowPrivateAccess = "true"))
 	UStaticMesh* GarbageCubeMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = workTime, meta = (AllowPrivateAccess = "true"))
@@ -43,12 +46,16 @@ class ACubeStorage : public AAutomatedBuilding
 private:
 	int32 spawned;
 
+	TArray<UStaticMeshComponent*> compressedCubes;
+
 public:
 	ACubeStorage();
 protected:
 	virtual void BeginPlay() override;
 
 public:
+
+	virtual void build() override;
 
 	virtual bool dropOffMaterial(Container* container) override;
 
