@@ -8,6 +8,7 @@
 #include "../StartInterface.h"
 #include "SortingStation.h"
 #include "NavModifierComponent.h"
+#include "Components/BoxComponent.h"
 #include "RecyclingInput.generated.h"
 
 UCLASS()
@@ -50,6 +51,9 @@ class ARecyclingInput : public AActor, public IInteractInterface, public IStartI
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* UpgradedMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* dropOffZone;
 
 	
 
@@ -107,6 +111,9 @@ private:
 
 	UFUNCTION()
 	void overflow();
+
+	UFUNCTION()
+	virtual void truckDropsOff(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
