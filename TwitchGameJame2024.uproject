@@ -24,6 +24,10 @@
 		{
 			"Name": "TwitchSDK",
 			"Enabled": true
+		},
+		{
+			"Name": "ClipboardNodes",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

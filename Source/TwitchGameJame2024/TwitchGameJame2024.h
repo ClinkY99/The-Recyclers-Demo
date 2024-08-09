@@ -19,6 +19,9 @@ struct FBuildableStruct
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<ABuildablesBase> classRef;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 cost;
 };
 
 UENUM(BlueprintType)

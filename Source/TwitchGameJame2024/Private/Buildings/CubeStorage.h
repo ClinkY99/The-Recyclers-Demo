@@ -22,6 +22,8 @@ class ACubeStorage : public AAutomatedBuilding
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = dropOffs, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ADropOffStation> dropOffClass;
 	
+	ADropOffStation* dropOffStation;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = workTime, meta = (AllowPrivateAccess = "true"))
 	TArray<UMaterial*> Materials;
 
@@ -43,6 +45,8 @@ class ACubeStorage : public AAutomatedBuilding
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = dropOffs, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AWorkstation> workstationClass;
 
+	AWorkstation* workstation;
+
 private:
 	int32 spawned;
 
@@ -56,6 +60,8 @@ protected:
 public:
 
 	virtual void build() override;
+
+	virtual void destroyBuilding() override;
 
 	virtual bool dropOffMaterial(Container* container) override;
 

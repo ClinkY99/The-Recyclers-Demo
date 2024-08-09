@@ -71,6 +71,13 @@ void ACubeStorage::build()
 	spawnWorkstation();
 }
 
+void ACubeStorage::destroyBuilding()
+{
+	dropOffStation->Destroy();
+	workstation->destroyWorkstation();
+	Super::destroyBuilding();
+}
+
 void ACubeStorage::SpawnTruck()
 {
 	int32 num = FMath::RandRange(0, 100);
@@ -92,7 +99,7 @@ void ACubeStorage::SpawnTruck()
 
 void ACubeStorage::spawnDropOff()
 {
-	ADropOffStation* dropOffStation = GetWorld()->SpawnActor<ADropOffStation>(dropOffClass);
+	dropOffStation = GetWorld()->SpawnActor<ADropOffStation>(dropOffClass);
 	dropOffStation->owner = this;
 	dropOffStation->isCompactCubes = true;
 
@@ -106,7 +113,7 @@ void ACubeStorage::spawnDropOff()
 
 void ACubeStorage::spawnWorkstation()
 {
-	AWorkstation* workstation = GetWorld()->SpawnActor<AWorkstation>(workstationClass);
+	workstation = GetWorld()->SpawnActor<AWorkstation>(workstationClass);
 	workstation->owner = this;
 
 	workstation->AttachToComponent(workStationPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);

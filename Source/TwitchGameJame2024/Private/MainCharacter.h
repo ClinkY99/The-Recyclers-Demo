@@ -62,14 +62,38 @@ class AMainCharacter : public ACharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> deleteBoxClass;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Workers, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> workerPlaceMarkerClass;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Workers, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AWorker> workerClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Trucks, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> TruckActor;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
 	int32 gridSize;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = RoundTime, meta = (AllowPrivateAccess = "true"))
+	float defaultRoundTime = 120;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = RoundTime, meta = (AllowPrivateAccess = "true"))
+	float increaseTime = 10;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = RoundTime, meta = (AllowPrivateAccess = "true"))
+	int32 incrementToIncreaseRoundTime = 3;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Trucks, meta = (AllowPrivateAccess = "true"))
+	int32 defaultNumTrucks = 10;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Trucks, meta = (AllowPrivateAccess = "true"))
+	int32 increaseAmountMax = 3;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Trucks, meta = (AllowPrivateAccess = "true"))
+	int32 incrementToGiveAddTrucks = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Contracts, meta = (AllowPrivateAccess = "true"))
+	int32 incrementToGiveContract = 3;
 
 public:
 
@@ -90,6 +114,32 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	bool isInRound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	FTimerHandle startRoundTimer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Building)
+	float timeToCancel = 5;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Building)
+	int32 money = 50;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	int32 moneyMadeInRound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	int32 roundNum;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	float currentRoundTime;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	FTimerHandle roundTimer;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	int32 numTrucks;
+
+	
 
 
 private:
@@ -115,6 +165,13 @@ private:
 	IInteractInterface* HoveredActor;
 
 	IInteractInterface* SelectedActor;
+
+	int32 priceOfCurrentBuilding;
+
+	FTimerHandle truckTimer;
+
+	FTimerHandle addGarbadgeTimer;
+
 	
 
 public:
@@ -136,6 +193,8 @@ protected:
 
 	void erasePressed(const FInputActionValue& Value);
 
+	void startRoundPressed();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -148,17 +207,28 @@ public:
 
 public:
 
+	
+
 	UFUNCTION(BlueprintCallable)
 	void enterBuildMode(FBuildableStruct buildingInfo);
 
 	UFUNCTION(BlueprintCallable)
-	void enterBuildModeWorker();
+	void enterBuildModeWorker(int32 price);
 	
+	UFUNCTION(BlueprintCallable)
+	void spawnDropOffTruckTruck();
+
 	UFUNCTION()
 	void SpawnCollectionTruck();
 
 	UFUNCTION()
 	void StartRound();
+
+	UFUNCTION()
+	void EndRound();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void showEndScreen(bool giveContract);
 
 	UFUNCTION()
 	void endGame();
@@ -174,6 +244,7 @@ private:
 	UFUNCTION()
 	void exitMode();
 
+	void truckDropsOff();
 
 public:
 	/** Returns CameraBoom subobject **/

@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "InputActionValue.h"
 #include "StartInterface.h"
+#include "Gameplay/RecyclingInput.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -65,7 +66,11 @@ void AMainCharacter::BeginPlay()
 
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 
+	currentRoundTime = defaultRoundTime;
+	numTrucks = defaultNumTrucks;
+
 	WorkerPlaceMarker = GetWorld()->SpawnActor<AActor>(workerPlaceMarkerClass);
+	WorkerPlaceMarker->SetActorLocation(FVector(0, 0, -500));
 }
 
 void AMainCharacter::Tick(float DeltaTime)
@@ -80,6 +85,9 @@ void AMainCharacter::Tick(float DeltaTime)
 
 			if (Hit.GetActor()) {
 				buildingHolo->SetActorLocation(snapToGrid2d(Hit.Location, gridSize, 0));
+				if (money < priceOfCurrentBuilding) {
+					buildingHolo->makeInvalid();
+				}
 			}
 		}
 	}
@@ -159,6 +167,7 @@ void AMainCharacter::enterBuildMode(FBuildableStruct buildingInfo)
 {
 	exitMode();
 	selectedBuildingInfo = buildingInfo;
+	priceOfCurrentBuilding = buildingInfo.cost;
 	buildingRotation = FRotator();
 
 	spawnNewPlaceable();
@@ -166,9 +175,10 @@ void AMainCharacter::enterBuildMode(FBuildableStruct buildingInfo)
 	inBuildMode = true;
 }
 
-void AMainCharacter::enterBuildModeWorker()
+void AMainCharacter::enterBuildModeWorker(int32 price)
 {
 	exitMode();
+	priceOfCurrentBuilding = price;
 	inBuildModeWorker = true;
 }
 
@@ -177,22 +187,67 @@ void AMainCharacter::SpawnCollectionTruck()
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("CollectionTruckCalled"));
 }
 
+void AMainCharacter::spawnDropOffTruckTruck() {
+	AActor* truck = GetWorld()->SpawnActor<AActor>(TruckActor);
+	truck->SetActorLocation(FVector(0, 0, -500));
+
+	GetWorldTimerManager().SetTimer(addGarbadgeTimer, this, &AMainCharacter::truckDropsOff, 5, false);
+}
+
+void AMainCharacter::truckDropsOff() {
+	Cast<ARecyclingInput>(UGameplayStatics::GetActorOfClass(GetWorld(), ARecyclingInput::StaticClass()))->truckArrives();
+}
+
 void AMainCharacter::StartRound()
 {
 	if (!isInRound) {
+		if (roundNum % incrementToIncreaseRoundTime == 0) {
+			currentRoundTime += increaseTime;
+		}
+
 		TArray<AActor*> actors;
 		UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UStartInterface::StaticClass(), actors);
 		for (auto& actor : actors) {
 			if (IStartInterface* actorCast = Cast<IStartInterface>(actor)) {
 				actorCast->startRound();
+
 			}
 		}
 		isInRound = true;
+		exitMode();
+
+		GetWorldTimerManager().SetTimer(roundTimer, this, &AMainCharacter::EndRound, currentRoundTime, false);
+
+
+		spawnDropOffTruckTruck();
+		GetWorldTimerManager().SetTimer(truckTimer, this, &AMainCharacter::spawnDropOffTruckTruck, currentRoundTime/numTrucks, true);
 	}
 }
 
+void AMainCharacter::EndRound()
+{
+	if (isInRound) {
+		TArray<AActor*> actors;
+		UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UStartInterface::StaticClass(), actors);
+		for (auto& actor : actors) {
+			if (IStartInterface* actorCast = Cast<IStartInterface>(actor)) {
+				actorCast->endRound();
+
+			}
+		}
+		isInRound = false;
+		exitMode();
+
+		if (roundNum % incrementToGiveAddTrucks == 0) {
+			numTrucks += FMath::RandRange(1, increaseAmountMax);
+		}
+
+		showEndScreen(roundNum % incrementToGiveContract == 0);
+	}
+}
 void AMainCharacter::endGame()
 {
+	GetWorldTimerManager().ClearTimer(roundTimer);
 	GEngine->AddOnScreenDebugMessage(-1, 15.0, FColor::Red, TEXT("Game Over"));
 }
 
@@ -228,7 +283,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(RClickAction, ETriggerEvent::Triggered, this, &AMainCharacter::RClick);
 		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Triggered, this, &AMainCharacter::escapePressed);
 		EnhancedInputComponent->BindAction(EraseAction, ETriggerEvent::Triggered, this, &AMainCharacter::erasePressed);
-		EnhancedInputComponent->BindAction(StartRoundAction, ETriggerEvent::Triggered, this, &AMainCharacter::StartRound);
+		EnhancedInputComponent->BindAction(StartRoundAction, ETriggerEvent::Triggered, this, &AMainCharacter::startRoundPressed);
 	}
 	else
 	{
@@ -267,9 +322,14 @@ void AMainCharacter::pressedLClick(const FInputActionValue& Value)
 {
 	if (inBuildMode) {
 		if (buildingHolo) {
-			buildingHolo->removeHolo();
-			placedThisTurn.Add(buildingHolo);
-			spawnNewPlaceable();
+			if (!buildingHolo->isInvalid) {
+				money -= priceOfCurrentBuilding;
+				buildingHolo->removeHolo();
+				buildingHolo->build();
+				placedThisTurn.Add(buildingHolo);
+
+				spawnNewPlaceable();
+			}
 		}
 	}
 	else if (inEraseMode) {
@@ -285,12 +345,12 @@ void AMainCharacter::pressedLClick(const FInputActionValue& Value)
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorker::StaticClass(), workers);
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorkstation::StaticClass(), workstations);
 
-		if (workers.Num() < workstations.Num()) {
+		if (workers.Num() < workstations.Num() && priceOfCurrentBuilding <= money) {
+			money -= priceOfCurrentBuilding;
 			AWorker* worker = GetWorld()->SpawnActor<AWorker>(workerClass);
 			if (worker) {
 				worker->SetActorLocation(WorkerPlaceMarker->GetActorLocation());
 			}
-			WorkerPlaceMarker->SetActorLocation(FVector(0, 0, -500));
 		}
 
 	}
@@ -362,10 +422,22 @@ void AMainCharacter::erasePressed(const FInputActionValue& Value)
 	}
 }
 
+void AMainCharacter::startRoundPressed()
+{
+	if (!isInRound) {
+		if (GetWorldTimerManager().IsTimerActive(startRoundTimer)) {
+			GetWorldTimerManager().ClearTimer(startRoundTimer);
+		}
+		else {
+			GetWorldTimerManager().SetTimer(startRoundTimer, this, &AMainCharacter::StartRound, timeToCancel, false);
+		}
+	}
+}
+
 void AMainCharacter::destroyActor()
 {
 	placedThisTurn.Remove(hoveredBuilding);
-	hoveredBuilding->Destroy();
+	hoveredBuilding->destroyBuilding();
 }
 
 void AMainCharacter::exitMode()

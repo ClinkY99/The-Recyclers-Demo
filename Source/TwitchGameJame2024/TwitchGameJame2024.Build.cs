@@ -8,11 +8,11 @@ public class TwitchGameJame2024 : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTasks", "AIModule", "NavigationSystem", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTasks", "AIModule", "NavigationSystem", "UMG", "TwitchSDK" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {"TwitchSDK"});
+        PrivateDependencyModuleNames.Add("TwitchSDK");
 
-		CppStandard = CppStandardVersion.Cpp17;
+        CppStandard = CppStandardVersion.Cpp17;
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

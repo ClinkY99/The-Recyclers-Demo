@@ -24,4 +24,7 @@ class IStartInterface
 public:
 	virtual void startRound() = 0;
 	virtual void endRound() = 0;
+	
+
+
 };

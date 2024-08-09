@@ -2,6 +2,7 @@
 
 
 #include "Buildings/BuildablesBase.h"
+#include "../Gameplay/RecyclingInput.h"
 
 // Sets default values
 ABuildablesBase::ABuildablesBase()
@@ -68,7 +69,6 @@ void ABuildablesBase::removeHolo()
 	mesh->SetVisibility(true);
 	placingMesh->SetVisibility(false);
 	isPlaced = true;
-	build();
 }
 
 void ABuildablesBase::makeInvalid()
@@ -83,16 +83,22 @@ void ABuildablesBase::build()
 
 }
 
+void ABuildablesBase::destroyBuilding()
+{
+	Destroy();
+}
+
+
 void ABuildablesBase::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (Cast<ABuildablesBase>(OtherActor) && !isPlaced) {
+	if ((Cast<ABuildablesBase>(OtherActor)|| Cast<ARecyclingInput>(OtherActor))&& !isPlaced) {
 		makeInvalid();
 	}
 }
 
 void ABuildablesBase::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (Cast<ABuildablesBase>(OtherActor)&&!isPlaced) {
+	if ((Cast<ABuildablesBase>(OtherActor) || Cast<ARecyclingInput>(OtherActor)) &&!isPlaced) {
 		makeHolo();
 	}
 }

@@ -23,6 +23,8 @@ class ACompactor : public AAutomatedBuilding
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = dropOffs, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ADropOffStation> dropOffClass;
 
+	ADropOffStation* dropOffStation;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = compressing, meta = (AllowPrivateAccess = "true"))
 	int32 numContainersRequired;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = compressing, meta = (AllowPrivateAccess = "true"))
@@ -39,6 +41,8 @@ class ACompactor : public AAutomatedBuilding
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = dropOffs, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AcompactingStation> workstationClass;
+
+	AcompactingStation* workstation;
 
 
 
@@ -64,6 +68,8 @@ public:
 	virtual void build() override;
 
 	void abortCompacting();
+
+	virtual void destroyBuilding() override;
 
 private:
 	void compress();

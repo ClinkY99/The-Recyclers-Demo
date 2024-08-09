@@ -76,6 +76,8 @@ public:
 
 	virtual void build();
 
+	virtual void destroyBuilding();
+
 protected:
 
 

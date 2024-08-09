@@ -48,6 +48,7 @@ void ARecyclingInput::BeginPlay()
 
 	spawnWorkstations(plasticWorkstation);
 	resources.Init(0, 4);
+	resourcesOverflow.Init(false, 4);
 	
 }
 
@@ -60,7 +61,7 @@ void ARecyclingInput::Tick(float DeltaTime)
 
 void ARecyclingInput::hover(bool isHovered)
 {
-	if (!isSelected) {
+	if (!isSelected&& !GetWorldTimerManager().IsTimerActive(overflowTimer)) {
 		mesh->SetRenderCustomDepth(isHovered);
 	}
 }
@@ -74,7 +75,9 @@ void ARecyclingInput::select(AMainCharacter* character)
 
 void ARecyclingInput::unselect(AMainCharacter* character)
 {
-	mesh->SetRenderCustomDepth(false);
+	if (!GetWorldTimerManager().IsTimerActive(overflowTimer)) {
+		mesh->SetRenderCustomDepth(false);
+	}
 	isSelected = false;
 	closeInfoWidget();
 }
@@ -86,11 +89,22 @@ void ARecyclingInput::truckArrives()
 	{
 		resources[i] += FMath::RandRange(1, 4);
 		if (resources[i] > maxRecyclingBeforeOverflow && !overflowTimer.IsValid()) {
+			resourcesOverflow[i] = true;
 			GetWorld()->GetTimerManager().SetTimer(overflowTimer, this, &ARecyclingInput::overflow, overFlowTime, false);
-			
+
+			mesh->SetRenderCustomDepth(true);
+			mesh->SetCustomDepthStencilValue(1);
+
 		}
 		if (resources[i] > maxRecyclingBeforeOverflow) {
 			resources[i] = 20;
+		}
+		else if (resourcesOverflow[i]) {
+			resourcesOverflow[i] = false;
+			GetWorld()->GetTimerManager().ClearTimer(overflowTimer);
+			mesh->SetRenderCustomDepth(false);
+			mesh->SetCustomDepthStencilValue(0);
+
 		}
 	}
 }
@@ -106,9 +120,7 @@ void ARecyclingInput::overflow()
 
 void ARecyclingInput::startRound()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Round Started"));
-	
-	GetWorld()->GetTimerManager().SetTimer(timer, this, &ARecyclingInput::truckArrives, FMath::Clamp(resourceAccumilationTimeBase/TurnsExisted, 3,60), true);
+
 }
 
 void ARecyclingInput::endRound()

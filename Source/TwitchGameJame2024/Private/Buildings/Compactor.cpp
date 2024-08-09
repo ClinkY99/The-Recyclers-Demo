@@ -50,6 +50,15 @@ void ACompactor::abortCompacting()
 	}
 }
 
+void ACompactor::destroyBuilding()
+{
+	workstation->destroyWorkstation();
+	if (dropOffStation->Destroy()) {
+		Super::destroyBuilding();
+	}
+	
+}
+
 void ACompactor::compress()
 {
 	TArray<Container*> containerSearch = TArray<Container*>(containers);
@@ -100,7 +109,7 @@ void ACompactor::finishCompressing()
 
 void ACompactor::spawnDropOff()
 {
-	ADropOffStation* dropOffStation = GetWorld()->SpawnActor<ADropOffStation>(dropOffClass);
+	dropOffStation = GetWorld()->SpawnActor<ADropOffStation>(dropOffClass);
 	dropOffStation->owner = this;
 
 	dropOffStation->AttachToComponent(dropOffPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
@@ -113,7 +122,7 @@ void ACompactor::spawnDropOff()
 
 void ACompactor::spawnWorkstation()
 {
-	AcompactingStation* workstation = GetWorld()->SpawnActor<AcompactingStation>(workstationClass);
+	workstation = GetWorld()->SpawnActor<AcompactingStation>(workstationClass);
 	workstation->owner = this;
 
 	workstation->AttachToComponent(workStationPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);

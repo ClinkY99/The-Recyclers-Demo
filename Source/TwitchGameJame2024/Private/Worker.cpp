@@ -39,6 +39,11 @@ void AWorker::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (inRound && !workstation) {
+		GetMesh()->SetCustomDepthStencilValue(1);
+		GetMesh()->SetRenderCustomDepth(true);
+
+	}
 }
 
 // Called to bind functionality to input
@@ -50,7 +55,8 @@ void AWorker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AWorker::hover(bool isHovered)
 {
-	if (!isSelected) {
+	if (!isSelected && !(inRound && !workstation)) {
+		GetMesh()->SetRenderCustomDepth(0);
 		GetMesh()->SetRenderCustomDepth(isHovered);
 	}
 }
@@ -58,7 +64,6 @@ void AWorker::hover(bool isHovered)
 
 void AWorker::select(AMainCharacter* character)
 {
-	GetMesh()->SetCustomDepthStencilValue(1);
 	isSelected = true;
 
 	character->inPathingMode = true;
@@ -71,7 +76,6 @@ void AWorker::select(AMainCharacter* character)
 
 void AWorker::unselect(AMainCharacter* character)
 {
-	GetMesh()->SetCustomDepthStencilValue(0);
 	GetMesh()->SetRenderCustomDepth(false);
 		
 	character->inPathingMode = false;
@@ -81,6 +85,15 @@ void AWorker::unselect(AMainCharacter* character)
 	if (workstation) {
 		workstation->unselect(character);
 	}
+}
+
+void AWorker::startRound()
+{
+	inRound = true;
+}
+void AWorker::endRound()
+{
+	inRound = false;
 }
 
 void AWorker::updateWorkBehavior(UBehaviorTree* NewBehavior)

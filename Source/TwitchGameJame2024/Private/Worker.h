@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InteractInterface.h"
+#include "StartInterface.h"
 #include "Gameplay/Workstation.h"
 #include "NavModifierComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
@@ -13,7 +14,7 @@
 
 
 UCLASS()
-class AWorker : public ACharacter, public IInteractInterface 
+class AWorker : public ACharacter, public IInteractInterface, public IStartInterface
 {
 	GENERATED_BODY()
 	
@@ -32,6 +33,9 @@ public:
 	bool doneWorking;
 
 	Container* containerOfMaterials;
+
+private:
+	bool inRound;
 
 public:
 	// Sets default values for this character's properties
@@ -54,9 +58,16 @@ public:
 
 	virtual void unselect(AMainCharacter* character) override;
 
+	virtual void startRound() override;
+
+	virtual void endRound() override;
+
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void setNewWorkStation(AWorkstation* newWorkstation);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void resetWorkstation();
 
 	UFUNCTION(BlueprintCallable)
 	void updateWorkBehavior(UBehaviorTree* NewBehavior);

@@ -70,6 +70,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = overflow)
 	FTimerHandle overflowTimer;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<bool> resourcesOverflow;
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TArray<int32> resources;
@@ -101,8 +104,6 @@ public:
 	virtual void endRound() override;
 
 private:
-	UFUNCTION()
-	void truckArrives();
 
 	UFUNCTION()
 	void overflow();
@@ -115,6 +116,9 @@ protected:
 	void closeInfoWidget();
 
 public:
+
+	UFUNCTION()
+	void truckArrives();
 
 	UFUNCTION(BlueprintCallable)
 	void upgrade();
