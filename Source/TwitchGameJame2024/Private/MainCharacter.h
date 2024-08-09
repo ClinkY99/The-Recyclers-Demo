@@ -218,7 +218,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void spawnDropOffTruckTruck();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void SpawnCollectionTruck();
 
 	UFUNCTION()

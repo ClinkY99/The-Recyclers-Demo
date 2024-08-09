@@ -6,6 +6,8 @@
 #include "Private/Buildings/BuildablesBase.h"
 #include "TwitchGameJame2024.generated.h"
 
+class AContracts_base;
+
 USTRUCT(BlueprintType)
 struct FBuildableStruct
 {
@@ -22,6 +24,24 @@ struct FBuildableStruct
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 cost;
+};
+
+USTRUCT(BlueprintType)
+struct FContractStruct
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AContracts_base> classRef;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 moneyBonus;
 };
 
 UENUM(BlueprintType)
