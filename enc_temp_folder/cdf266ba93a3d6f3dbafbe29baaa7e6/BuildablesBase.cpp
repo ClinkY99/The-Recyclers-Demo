@@ -58,6 +58,7 @@ void ABuildablesBase::endRound()
 
 void ABuildablesBase::makeHolo()
 {
+	mesh->SetVisibility(false);
 	placingMesh->SetVisibility(true);
 	placingMesh->SetMaterial(0,HoloMat);
 	isInvalid = false;
@@ -65,6 +66,7 @@ void ABuildablesBase::makeHolo()
 
 void ABuildablesBase::removeHolo()
 {
+	mesh->SetVisibility(true);
 	placingMesh->SetVisibility(false);
 	isPlaced = true;
 }

@@ -214,8 +214,14 @@ void AMainCharacter::StartRound()
 
 		GetWorldTimerManager().SetTimer(roundTimer, this, &AMainCharacter::EndRound, currentRoundTime, false);
 
+
 		spawnDropOffTruckTruck();
 		spawnDropOffTruckTruck();
+		spawnDropOffTruckTruck();
+		spawnDropOffTruckTruck();
+		spawnDropOffTruckTruck();
+
+
 
 		GetWorldTimerManager().SetTimer(truckTimer, this, &AMainCharacter::spawnDropOffTruckTruck, currentRoundTime/numTrucks, true);
 

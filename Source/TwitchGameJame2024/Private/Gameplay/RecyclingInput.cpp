@@ -4,6 +4,7 @@
 #include "Gameplay/RecyclingInput.h"
 #include "MainCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "../GarbadgeTruck.h"
 
 // Sets default values
 ARecyclingInput::ARecyclingInput()
@@ -106,14 +107,9 @@ void ARecyclingInput::unselect(AMainCharacter* character)
 
 void ARecyclingInput::truckArrives()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Generate Plastic"));
 	for (size_t i = 0; i < teir; i++)
 	{
 		resources[i] += FMath::RandRange(1, 4);
-		
-		if (resources[i] > maxRecyclingBeforeOverflow) {
-			resources[i] = 20;
-		}
 		
 	}
 }
@@ -129,7 +125,9 @@ void ARecyclingInput::overflow()
 
 void ARecyclingInput::truckDropsOff(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	truckArrives();
+	if (Cast<AGarbadgeTruck>(OtherActor)) {
+		truckArrives();
+	}
 }
 
 void ARecyclingInput::startRound()
@@ -140,6 +138,7 @@ void ARecyclingInput::startRound()
 void ARecyclingInput::endRound()
 {
 	GetWorldTimerManager().ClearTimer(timer);
+	GetWorldTimerManager().ClearTimer(overflowTimer);
 }
 
 void ARecyclingInput::upgrade()

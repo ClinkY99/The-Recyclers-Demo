@@ -83,8 +83,6 @@ void AWorkstation::workerOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 {
 	if (AWorker* workerOverlap = Cast<AWorker>(OtherActor)) {
 		if (workerOverlap == worker) {
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Overlap"));
-
 			worker->doneWorking = false;
 
 			workerOnStation = true;
