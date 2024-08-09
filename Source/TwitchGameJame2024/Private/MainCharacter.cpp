@@ -71,6 +71,8 @@ void AMainCharacter::BeginPlay()
 
 	WorkerPlaceMarker = GetWorld()->SpawnActor<AActor>(workerPlaceMarkerClass);
 	WorkerPlaceMarker->SetActorLocation(FVector(0, 0, -500));
+
+	playPreRoundMusic();
 }
 
 void AMainCharacter::Tick(float DeltaTime)
@@ -190,12 +192,6 @@ void AMainCharacter::SpawnCollectionTruck()
 void AMainCharacter::spawnDropOffTruckTruck() {
 	AActor* truck = GetWorld()->SpawnActor<AActor>(TruckActor);
 	truck->SetActorLocation(FVector(0, 0, -500));
-
-	GetWorldTimerManager().SetTimer(addGarbadgeTimer, this, &AMainCharacter::truckDropsOff, 5, false);
-}
-
-void AMainCharacter::truckDropsOff() {
-	Cast<ARecyclingInput>(UGameplayStatics::GetActorOfClass(GetWorld(), ARecyclingInput::StaticClass()))->truckArrives();
 }
 
 void AMainCharacter::StartRound()
@@ -220,7 +216,16 @@ void AMainCharacter::StartRound()
 
 
 		spawnDropOffTruckTruck();
+		spawnDropOffTruckTruck();
+		spawnDropOffTruckTruck();
+		spawnDropOffTruckTruck();
+		spawnDropOffTruckTruck();
+
+
+
 		GetWorldTimerManager().SetTimer(truckTimer, this, &AMainCharacter::spawnDropOffTruckTruck, currentRoundTime/numTrucks, true);
+
+		playRoundMusic();
 	}
 }
 
@@ -235,6 +240,8 @@ void AMainCharacter::EndRound()
 
 			}
 		}
+		GetWorldTimerManager().ClearTimer(truckTimer);
+
 		isInRound = false;
 		exitMode();
 

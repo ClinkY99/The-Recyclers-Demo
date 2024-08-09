@@ -31,6 +31,9 @@ ARecyclingInput::ARecyclingInput()
 	cansWorkstation = CreateDefaultSubobject<USceneComponent>(FName("Cans Workstations Spawn Loc"));
 	cansWorkstation->SetupAttachment(mesh);
 
+	dropOffZone = CreateDefaultSubobject<UBoxComponent>(FName("Overlap"));
+	dropOffZone->SetupAttachment(mesh);
+
 	teir = 1;
 
 	spacing = 100;
@@ -49,6 +52,8 @@ void ARecyclingInput::BeginPlay()
 	spawnWorkstations(plasticWorkstation);
 	resources.Init(0, 4);
 	resourcesOverflow.Init(false, 4);
+
+	dropOffZone->OnComponentEndOverlap.AddDynamic(this, &ARecyclingInput::truckDropsOff);
 	
 }
 
@@ -116,6 +121,11 @@ void ARecyclingInput::overflow()
 	if (AMainCharacter* characterRef = Cast<AMainCharacter>(character)) {
 		characterRef->endGame();
 	}
+}
+
+void ARecyclingInput::truckDropsOff(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	truckArrives();
 }
 
 void ARecyclingInput::startRound()

@@ -233,6 +233,14 @@ public:
 	UFUNCTION()
 	void endGame();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void playRoundMusic();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void playPreRoundMusic();
+
+
+
 private:
 
 	UFUNCTION()
@@ -243,8 +251,6 @@ private:
 
 	UFUNCTION()
 	void exitMode();
-
-	void truckDropsOff();
 
 public:
 	/** Returns CameraBoom subobject **/
