@@ -63,7 +63,7 @@ void ARecyclingInput::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	for (size_t i = 0; i < teir; i++)
 	{
-		if (resources[i] >= maxRecyclingBeforeOverflow && !overflowTimer.IsValid()) {
+		if (resources[i] > maxRecyclingBeforeOverflow && !overflowTimer.IsValid()) {
 			resourcesOverflow[i] = true;
 			GetWorld()->GetTimerManager().SetTimer(overflowTimer, this, &ARecyclingInput::overflow, overFlowTime, false);
 
