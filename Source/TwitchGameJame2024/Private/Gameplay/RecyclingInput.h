@@ -46,8 +46,7 @@ class ARecyclingInput : public AActor, public IInteractInterface, public IStartI
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = workstations, meta = (AllowPrivateAccess = "true"))
 	float overFlowTime;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = workstations, meta = (AllowPrivateAccess = "true"))
-	int32 maxRecyclingBeforeOverflow;
+	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* UpgradedMesh;
@@ -83,6 +82,16 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	int32 teir;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 minGardbage = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 maxGardbage = 2;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = workstations, meta = (AllowPrivateAccess = "true"))
+	int32 maxRecyclingBeforeOverflow;
+
 
 public:	
 	// Sets default values for this actor's properties

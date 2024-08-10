@@ -39,13 +39,8 @@ class ACubeStorage : public AAutomatedBuilding
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = workTime, meta = (AllowPrivateAccess = "true"))
 	int32 maxSizeAmount;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = dropOffs, meta = (AllowPrivateAccess = "true"))
-	USceneComponent* workStationPoint;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = dropOffs, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AWorkstation> workstationClass;
-
-	AWorkstation* workstation;
+public:
+	TArray<UStaticMeshComponent*> cubes;
 
 private:
 	int32 spawned;
@@ -65,11 +60,11 @@ public:
 
 	virtual bool dropOffMaterial(Container* container) override;
 
+	void removeCubes();
+
 private:
-	void SpawnTruck();
 
 	void spawnDropOff();
 
-	void spawnWorkstation();
 
 };

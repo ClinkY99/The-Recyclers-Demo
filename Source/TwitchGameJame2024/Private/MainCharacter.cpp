@@ -16,6 +16,8 @@
 #include "InputActionValue.h"
 #include "StartInterface.h"
 #include "Gameplay/RecyclingInput.h"
+#include "Buildings/CubeStorage.h"
+#include "Contracts/contracts_base.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -184,11 +186,6 @@ void AMainCharacter::enterBuildModeWorker(int32 price)
 	inBuildModeWorker = true;
 }
 
-void AMainCharacter::SpawnCollectionTruck()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("CollectionTruckCalled"));
-}
-
 void AMainCharacter::spawnDropOffTruckTruck() {
 	AActor* truck = GetWorld()->SpawnActor<AActor>(TruckActor);
 	truck->SetActorLocation(FVector(0, 0, -500));
@@ -196,6 +193,7 @@ void AMainCharacter::spawnDropOffTruckTruck() {
 
 void AMainCharacter::StartRound()
 {
+	moneyMadeInRound = 0;
 	if (!isInRound) {
 		if (roundNum % incrementToIncreaseRoundTime == 0) {
 			currentRoundTime += increaseTime;
@@ -214,12 +212,26 @@ void AMainCharacter::StartRound()
 
 		GetWorldTimerManager().SetTimer(roundTimer, this, &AMainCharacter::EndRound, currentRoundTime, false);
 
-		spawnDropOffTruckTruck();
-		spawnDropOffTruckTruck();
+		for (size_t i = 0; i < morningRush; i++)
+		{
+			spawnDropOffTruckTruck();
+		}
 
 		GetWorldTimerManager().SetTimer(truckTimer, this, &AMainCharacter::spawnDropOffTruckTruck, currentRoundTime/numTrucks, true);
 
+		FTimerHandle midDayRushTimer;
+
+		GetWorldTimerManager().SetTimer(midDayRushTimer, this, &AMainCharacter::middayRush, currentRoundTime / 2, false);
+
 		playRoundMusic();
+	}
+}
+
+void AMainCharacter::middayRush()
+{
+	for (size_t i = 0; i < midDayRush; i++)
+	{
+		spawnDropOffTruckTruck();
 	}
 }
 
@@ -236,11 +248,32 @@ void AMainCharacter::EndRound()
 		}
 		GetWorldTimerManager().ClearTimer(truckTimer);
 
+		TArray<AActor*> actor2;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACubeStorage::StaticClass(), actor2);
+
+		for (auto& actor : actor2) {
+			if (ACubeStorage* actorCast = Cast<ACubeStorage>(actor)) {
+				moneyMadeInRound += actorCast->cubes.Num() * moneyPerCube * (100*moneyBonus +1);
+				actorCast->removeCubes();
+			}
+		}
+		if (moneyMadeInRound < 1) {
+			moneyMadeInRound += 30;
+		}
+
+		money += moneyMadeInRound;
+
 		isInRound = false;
 		exitMode();
 
 		if (roundNum % incrementToGiveAddTrucks == 0) {
 			numTrucks += FMath::RandRange(1, increaseAmountMax);
+		}
+		if (roundNum % incrementToIncreaseOverflow == 0) {
+			AActor* actorRef = UGameplayStatics::GetActorOfClass(GetWorld(), ARecyclingInput::StaticClass());
+			if (ARecyclingInput* recyclingInput = Cast<ARecyclingInput>(actorRef)) {
+				recyclingInput->maxRecyclingBeforeOverflow += increaseOverflowBy;
+			}
 		}
 
 		showEndScreen(roundNum % incrementToGiveContract == 0);
@@ -248,13 +281,12 @@ void AMainCharacter::EndRound()
 }
 
 void AMainCharacter::contractPicked(FContractStruct contract) {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0, FColor::Green, TEXT("ContractPicked"));
-}
+	AActor* contractref = UGameplayStatics::GetActorOfClass(GetWorld(), contract.classRef);
 
-void AMainCharacter::endGame()
-{
-	GetWorldTimerManager().ClearTimer(roundTimer);
-	GEngine->AddOnScreenDebugMessage(-1, 15.0, FColor::Red, TEXT("Game Over"));
+	if (AContracts_base* contractActor = Cast<AContracts_base>(contractref)) {
+		contractActor->picked();
+		moneyBonus += contract.moneyBonus;
+	}	
 }
 
 void AMainCharacter::spawnNewPlaceable()
@@ -342,6 +374,7 @@ void AMainCharacter::pressedLClick(const FInputActionValue& Value)
 		if (hoveredBuilding) {
 			if (placedThisTurn.Contains(hoveredBuilding)) {
 				destroyActor();
+				money += 40;
 			}
 		}
 	}

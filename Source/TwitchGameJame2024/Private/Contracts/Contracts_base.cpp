@@ -15,3 +15,8 @@ void AContracts_base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+void AContracts_base::picked()
+{
+	BPLogicPicked();
+}

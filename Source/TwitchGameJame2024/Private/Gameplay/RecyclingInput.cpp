@@ -109,7 +109,7 @@ void ARecyclingInput::truckArrives()
 {
 	for (size_t i = 0; i < teir; i++)
 	{
-		resources[i] += FMath::RandRange(1, 4);
+		resources[i] += FMath::RandRange(minGardbage, maxGardbage);
 		
 	}
 }
@@ -132,7 +132,8 @@ void ARecyclingInput::truckDropsOff(UPrimitiveComponent* OverlappedComponent, AA
 
 void ARecyclingInput::startRound()
 {
-
+	resourcesOverflow.Empty();
+	resourcesOverflow.Init(false, 4);
 }
 
 void ARecyclingInput::endRound()
@@ -143,7 +144,7 @@ void ARecyclingInput::endRound()
 
 void ARecyclingInput::upgrade()
 {
-
+	addResource();
 }
 
 void ARecyclingInput::addResource()

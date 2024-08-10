@@ -28,7 +28,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-	void picked() {};
+	void picked();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BPLogicPicked();

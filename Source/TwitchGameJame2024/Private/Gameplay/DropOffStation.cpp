@@ -94,13 +94,15 @@ void ADropOffStation::workerLeavesOverlap(UPrimitiveComponent* OverlappedCompone
 
 void ADropOffStation::work()
 {
-	if (owner->dropOffMaterial(workers[0]->containerOfMaterials)) {
+	if (workers.Num() > 0) {
+		if (owner->dropOffMaterial(workers[0]->containerOfMaterials)) {
+			workers[0]->doneWorking = true;
+			workers[0]->containerOfMaterials = nullptr;
+		}
+
 		workers[0]->doneWorking = true;
-		workers[0]->containerOfMaterials = nullptr;
 	}
-	
-	workers[0]->doneWorking = true;
-	
+
 	//owner do stuff
 }
 

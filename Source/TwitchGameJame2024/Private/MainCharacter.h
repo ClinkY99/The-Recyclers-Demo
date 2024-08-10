@@ -95,6 +95,15 @@ class AMainCharacter : public ACharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Contracts, meta = (AllowPrivateAccess = "true"))
 	int32 incrementToGiveContract = 3;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Contracts, meta = (AllowPrivateAccess = "true"))
+	int32 incrementToIncreaseOverflow = 5;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Contracts, meta = (AllowPrivateAccess = "true"))
+	int32 increaseOverflowBy = 5;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Trucks, meta = (AllowPrivateAccess = "true"))
+	int32 moneyPerCube = 10;
+
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
@@ -127,8 +136,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	int32 moneyMadeInRound;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Building)
+	int32 moneyBonus = 0;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
-	int32 roundNum;
+	int32 roundNum = 1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	float currentRoundTime;
@@ -138,6 +150,15 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
 	int32 numTrucks;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	int32 morningRush = 2;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	int32 midDayRush = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Building)
+	float workerEfficiency = 1.0;
 
 	
 
@@ -218,9 +239,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void spawnDropOffTruckTruck();
 
-	UFUNCTION(BlueprintCallable)
-	void SpawnCollectionTruck();
-
 	UFUNCTION()
 	void StartRound();
 
@@ -233,7 +251,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void contractPicked(FContractStruct contract);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintImplementableEvent)
 	void endGame();
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
@@ -241,6 +259,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void playPreRoundMusic();
+
+	UFUNCTION()
+	void middayRush();
 
 
 

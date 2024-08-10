@@ -6,6 +6,7 @@
 #include "MainCharacter.h"
 #include "AIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AWorker::AWorker(){
@@ -43,6 +44,12 @@ void AWorker::Tick(float DeltaTime)
 		GetMesh()->SetCustomDepthStencilValue(1);
 		GetMesh()->SetRenderCustomDepth(true);
 
+	}
+
+	ACharacter* character = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+
+	if (AMainCharacter* mainCharacter = Cast<AMainCharacter>(character)) {
+		workEfficiency = mainCharacter->workerEfficiency;
 	}
 }
 

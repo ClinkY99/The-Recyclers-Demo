@@ -13,6 +13,6 @@ public:
 	Container();
 	~Container();
 
-	int32 materialType;
+	int32 materialType = 0;
 	int32 amountOfMaterial = 0;
 };

@@ -61,40 +61,13 @@ void ACompactor::destroyBuilding()
 
 void ACompactor::compress()
 {
-	TArray<Container*> containerSearch = TArray<Container*>(containers);
-	TArray<Container*> containersFound;
-
-	for (auto& firstContainer : containerSearch)
-	{
-		containersFound.Add(firstContainer);
-		if (containersFound.Num() != numContainersRequired) {
-			for (auto& container : containerSearch) {
-				if (container->materialType == containersFound[0]->materialType) {
-					containersFound.Add(container);
-					if (containersFound.Num() == numContainersRequired) {
-						break;
-					}
-				}
-			}
-			if (containersFound.Num() != numContainersRequired) {
-				for (auto& container : containersFound) {
-					containerSearch.Remove(container);
-				}
-				containersFound.Empty();
-			}
-			else {
-				break;
-			}
-		}
-	}
-	if (containersFound.Num() > 0) {
-		materialType = containersFound[0]->materialType;
-		for (auto& containersUsed : containersFound) {
-			containers.Remove(containersUsed);
-		}
+	if (containers.Num()!=0) {
+		materialType = containers[0]->materialType;
+		containers.RemoveAt(0, EAllowShrinking::Yes);
 		isCompressing = true;
 		GetWorldTimerManager().SetTimer(compressionTimer, this, &ACompactor::finishCompressing, compressionTime, false);
-	}	
+	}
+		
 }
 
 void ACompactor::finishCompressing()

@@ -13,9 +13,6 @@ ACubeStorage::ACubeStorage()
 
 	dropOffPoint = CreateDefaultSubobject<USceneComponent>(FName("DropOffLocation"));
 	dropOffPoint->SetupAttachment(mesh);
-
-	workStationPoint = CreateDefaultSubobject<USceneComponent>(FName("WorkStationLocation"));
-	workStationPoint->SetupAttachment(mesh);
 }
 
 void ACubeStorage::BeginPlay()
@@ -56,11 +53,21 @@ bool ACubeStorage::dropOffMaterial(Container* container)
 
 		compressedCube->SetRelativeRotation(newRotation);
 
-		SpawnTruck();
+		cubes.Add(compressedCube);
 
 		return true;
 	}
 	return false;
+}
+
+void ACubeStorage::removeCubes()
+{
+	for (auto& cube : cubes) {
+		cube->SetVisibility(false);
+		cube->DestroyComponent();
+	}
+	spawned = 0;
+	cubes.Empty();
 }
 
 void ACubeStorage::build()
@@ -68,32 +75,12 @@ void ACubeStorage::build()
 	if (!inputBuilding) {
 		spawnDropOff();
 	}
-	spawnWorkstation();
 }
 
 void ACubeStorage::destroyBuilding()
 {
 	dropOffStation->Destroy();
-	workstation->destroyWorkstation();
 	Super::destroyBuilding();
-}
-
-void ACubeStorage::SpawnTruck()
-{
-	int32 num = FMath::RandRange(0, 100);
-	if (spawned == 4) {
-		if (num < 10) {
-			Cast<AMainCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))->SpawnCollectionTruck();
-		}
-	}
-	if (spawned == 5) {
-		if (num < 33) {
-			Cast<AMainCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))->SpawnCollectionTruck();
-		}
-	} 
-	if (spawned > 5) {
-		Cast<AMainCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))->SpawnCollectionTruck();
-	}
 }
 
 
@@ -108,17 +95,4 @@ void ACubeStorage::spawnDropOff()
 	FVector location = dropOffStation->GetActorLocation();
 	location.Z = 0;
 	dropOffStation->SetActorLocation(location);
-}
-
-
-void ACubeStorage::spawnWorkstation()
-{
-	workstation = GetWorld()->SpawnActor<AWorkstation>(workstationClass);
-	workstation->owner = this;
-
-	workstation->AttachToComponent(workStationPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-
-	FVector location = workstation->GetActorLocation();
-	location.Z = 0;
-	workstation->SetActorLocation(location);
 }
