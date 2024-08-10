@@ -72,32 +72,34 @@ void ADropOffStation::workerOverlap(UPrimitiveComponent* OverlappedComponent, AA
 {
 	if (AWorker* workerOverlap = Cast<AWorker>(OtherActor)) {
 		
-		worker = workerOverlap;
+		workers.Add(workerOverlap);
 
-		worker->doneWorking = false;
+		workerOverlap->doneWorking = false;
 
 		workerOnStation = true;
 
-		GetWorld()->GetTimerManager().SetTimer(workTimer, this, &ADropOffStation::work, (defaultUnloadTime + defaultUnloadTime * (1 - worker->workEfficiency)) * (EfficiencyBonus), false);
+		GetWorld()->GetTimerManager().SetTimer(workTimer, this, &ADropOffStation::work, (defaultUnloadTime + defaultUnloadTime * (1 - workerOverlap->workEfficiency)) * (EfficiencyBonus), false);
 	}
 }
 
 void ADropOffStation::workerLeavesOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (Cast<AWorker>(OtherActor)) {
-		workerOnStation = false;
+	if (AWorker* worker = Cast<AWorker>(OtherActor)) {
+		workers.Remove(worker);
+		if (workers.Num() == 0) {
+			workerOnStation = false;
+		}
 	}
 }
 
 void ADropOffStation::work()
 {
-	if (owner->dropOffMaterial(worker->containerOfMaterials)) {
-		worker->doneWorking = true;
-		worker->containerOfMaterials = nullptr;
+	if (owner->dropOffMaterial(workers[0]->containerOfMaterials)) {
+		workers[0]->doneWorking = true;
+		workers[0]->containerOfMaterials = nullptr;
 	}
-	else {
-		GetWorld()->GetTimerManager().SetTimer(workTimer, this, &ADropOffStation::work, (defaultUnloadTime + defaultUnloadTime * (1 - worker->workEfficiency)) * (EfficiencyBonus), false);
-	}
+	
+	workers[0]->doneWorking = true;
 	
 	//owner do stuff
 }

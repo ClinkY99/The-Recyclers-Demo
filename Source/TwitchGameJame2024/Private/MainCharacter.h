@@ -255,7 +255,9 @@ private:
 	UFUNCTION()
 	void exitMode();
 
-	protected:
+protected:
+	UFUNCTION(BlueprintImplementableEvent)
+	void pauseGame();
 
 
 public:

@@ -41,7 +41,7 @@ protected:
 	bool inRound;
 	
 
-	class AWorker* worker;
+	TArray<class AWorker*> workers;
 
 private:
 	FTimerHandle workTimer;

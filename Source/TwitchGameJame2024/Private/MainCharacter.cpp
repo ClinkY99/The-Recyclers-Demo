@@ -412,13 +412,13 @@ void AMainCharacter::escapePressed(const FInputActionValue& Value)
 		SelectedActor = nullptr;
 	}
 	else {
-		//pause game
+		pauseGame();
 	}
 }
 
 void AMainCharacter::erasePressed(const FInputActionValue& Value)
 {
-	if (!inEraseMode) {
+	if (!inEraseMode && !isInRound) {
 		if (inBuildMode) {
 			inBuildMode = false;
 			buildingHolo->Destroy();
